@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsxfa.cloud.core.mapper.UserLoginRecordMapper">
+
+    <select id="userLoginList" resultType="com.zsxfa.cloud.core.pojo.entity.UserLoginRecord">
+        select * from user_login_record a
+            <if test="userName != null">
+                <bind name="userName" value="'%' + userName + '%'" />
+                where a.user_name like #{userName}
+            </if>
+            order by a.login_time DESC
+        <if test="page != null and limit != null">
+            limit #{page}, #{limit}
+        </if>
+    </select>
+
+</mapper>

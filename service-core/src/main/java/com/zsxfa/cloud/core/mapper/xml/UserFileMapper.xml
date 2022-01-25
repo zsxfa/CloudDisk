@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsxfa.cloud.core.mapper.UserFileMapper">
+    <update id="updateFilepathByPathAndName">
+        update user_file set filePath = #{param2}
+        where filePath = #{param1} and fileName = #{param3}
+        <if test="param4 != null">
+            and extendName = #{param4}
+        </if>
+        <if test="param4 == null">
+            and extendName is null
+        </if>
+        and userId = #{param5}
+    </update>
+    <update id="updateFilepathByFilepath">
+        UPDATE user_file SET filePath=REPLACE(filePath, #{param1}, #{param2})
+        WHERE filePath like N'${param1}%' and userId = #{param3}
+    </update>
+
+    <update id="replaceFilePath">
+        UPDATE user_file SET filepath=REPLACE(filepath, #{oldFilePath}, #{filePath})
+        WHERE filepath LIKE N'${oldFilePath}%' and userId = #{userId};
+    </update>
+
+    <select id="userFileList" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file a
+        left join file on file.fileId = a.fileId
+        <where>
+            <if test="userFile.userId != null">
+                and a.userId = #{userFile.userId}
+            </if>
+            <if test="userFile.filePath != null">
+                and a.filePath = #{userFile.filePath}
+            </if>
+            <if test="userFile.extendName != null">
+                and a.extendName = #{userFile.extendName}
+            </if>
+            <if test="userFile.userFileId != null">
+                and a.userFileId = #{userFile.userFileId}
+            </if>
+            <if test="userFile.fileName != null">
+                and a.fileName = #{userFile.fileName}
+            </if>
+            and a.deleteFlag = 0
+        </where>
+        ORDER BY  isDir desc
+        <if test="beginCount != null and pageCount != null">
+            limit #{beginCount}, #{pageCount}
+        </if>
+    </select>
+
+    <select id="adminFileList" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file a
+        left join file on file.fileId = a.fileId
+        where
+        <if test="userId != null">
+            a.userId = #{userId} and
+        </if>
+        a.deleteFlag = 0
+        and a.isDir = 0
+        <if test="beginCount != null and pageCount != null">
+            limit #{beginCount}, #{pageCount}
+        </if>
+    </select>
+    <select id="getUserInfo" resultType="com.zsxfa.cloud.core.pojo.entity.User">
+        select * from user_file a
+        left join user on user.userId = a.userId
+        where a.userId = #{userId}
+        and a.fileId = #{fileId}
+    </select>
+
+
+    <select id="selectStorageSizeByUserId" resultType="java.lang.Long">
+        SELECT SUM(fileSize) FROM user_file
+        LEFT JOIN file ON file.fileId = user_file.fileId
+        WHERE user_file.userId = #{userId}
+    </select>
+
+    <!--  通过扩展名查找  -->
+    <sql id="selectByExtendName" >
+        left join file on file.fileId = user_file.fileId
+        where extendName in
+        <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
+            #{fileName}
+        </foreach>
+        <if test="userId != null">
+            and userId = #{userId}
+        </if>
+        and deleteFlag = 0
+    </sql>
+    <select id="selectFileByExtendName" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file
+        <include refid="selectByExtendName"></include>
+        limit #{beginCount}, #{pageCount}
+    </select>
+    <select id="selectCountByExtendName" resultType="java.lang.Long">
+        select count(*) from user_file
+        <include refid="selectByExtendName"></include>
+    </select>
+    <!--  查找不符合扩展名的  -->
+    <sql id="selectByNotExtendName">
+        left join file on file.fileId = user_file.fileId
+        where extendName not in
+        <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
+            #{fileName}
+        </foreach>
+        <if test="userId != null">
+            and userId = #{userId}
+        </if>
+        and deleteFlag = 0
+    </sql>
+    <select id="selectFileNotInExtendNames" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file
+        <include refid="selectByNotExtendName"></include>
+        limit #{beginCount}, #{pageCount}
+    </select>
+    <select id="selectCountNotInExtendNames" resultType="java.lang.Long">
+        select count(*) from user_file
+        <include refid="selectByNotExtendName"></include>
+    </select>
+
+    <select id="userSearchFileList" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file a
+        left join file on file.fileId = a.fileId
+        <where>
+             a.userId = #{userFile.userId}
+            <bind name="pattern" value="'%' + userFile.fileName + '%'" />
+            and a.fileName like "%"#{userFile.fileName}"%"
+            and a.deleteFlag = 0
+        </where>
+        ORDER BY  isDir desc
+        <if test="beginCount != null and pageCount != null">
+            limit #{beginCount}, #{pageCount}
+        </if>
+
+    </select>
+
+
+    <!--  管理员端查找不符合扩展名的  -->
+    <sql id="adminSelectByNotExtendName">
+        left join file on file.fileId = user_file.fileId
+        where extendName not in
+        <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
+            #{fileName}
+        </foreach>
+        <if test="userId != null">
+            and user_file.userId = #{userId}
+        </if>
+        and deleteFlag = 0
+    </sql>
+    <select id="adminSelectFileNotInExtendNames" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file
+        <include refid="adminSelectByNotExtendName"></include>
+        limit #{page}, #{limit}
+    </select>
+    <select id="adminSelectCountNotInExtendNames" resultType="java.lang.Long">
+        select count(*) from user_file
+        <include refid="adminSelectByNotExtendName"></include>
+        and user_file.isDir=0
+    </select>
+    <!--  管理员端查找符合扩展名的  -->
+    <sql id="adminSelectByExtendName" >
+        left join file on file.fileId = user_file.fileId
+        where extendName in
+        <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
+            #{fileName}
+        </foreach>
+        <if test="userId != null">
+            and user_file.userId = #{userId}
+        </if>
+        and deleteFlag = 0
+    </sql>
+    <select id="adminSelectFileByExtendName" resultType="com.zsxfa.cloud.core.pojo.vo.FileListVo">
+        select * from user_file
+        <include refid="adminSelectByExtendName"></include>
+        limit #{page}, #{limit}
+    </select>
+    <select id="adminSelectCountByExtendName" resultType="java.lang.Long">
+        select count(*) from user_file
+        <include refid="adminSelectByExtendName"></include>
+        and user_file.isDir=0
+    </select>
+
+
+
+</mapper>

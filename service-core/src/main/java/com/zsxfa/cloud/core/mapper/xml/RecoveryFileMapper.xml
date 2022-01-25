@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsxfa.cloud.core.mapper.RecoveryFileMapper">
+
+    <select id="selectRecoveryFileList" resultType="com.zsxfa.cloud.core.pojo.vo.RecoveryFileListVo">
+        SELECT * FROM recovery_file a
+        LEFT JOIN user_file b ON a.userFileId = b.userFileId
+        WHERE userId = #{userId}
+    </select>
+</mapper>

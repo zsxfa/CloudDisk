@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zsxfa.cloud.core.mapper.DisplayPageMapper">
+
+    <select id="searchToatl" resultType="java.lang.Long">
+        select count(*) from user_file
+        where
+        <if test="userId" ></if>
+        <if test="userId != null">
+             userId = #{userId} and
+        </if>
+        deleteFlag = 0 and isDir = 0
+    </select>
+    <!--  管理员端查找不符合扩展名的  -->
+    <sql id="adminSelectByNotExtendName">
+        left join file on file.fileId = user_file.fileId
+        where extendName not in
+        <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
+            #{fileName}
+        </foreach>
+        and deleteFlag = 0
+    </sql>
+    <select id="adminDisplaySelectCountNotInExtendName" resultType="com.zsxfa.cloud.core.pojo.dto.view.FileSearch">
+        select
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -6 day),'%Y-%m-%d') THEN 1 end) as Mon,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -5 day),'%Y-%m-%d') THEN 1 end) as Tue,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -4 day),'%Y-%m-%d') THEN 1 end) as Wed,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -3 day),'%Y-%m-%d') THEN 1 end) as Thu,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -2 day),'%Y-%m-%d') THEN 1 end) as Fri,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -1 day),'%Y-%m-%d') THEN 1 end) as Sat,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -0 day),'%Y-%m-%d') THEN 1 end) as Sun
+        from user_file
+        <include refid="adminSelectByNotExtendName"></include>
+    </select>
+    <!--  管理员端查找符合扩展名的  -->
+    <sql id="adminSelectByExtendName" >
+        left join file on file.fileId = user_file.fileId
+        where extendName in
+        <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
+            #{fileName}
+        </foreach>
+        and deleteFlag = 0
+    </sql>
+    <select id="adminDisplaySelectCountByExtendName" resultType="com.zsxfa.cloud.core.pojo.dto.view.FileSearch">
+        select
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -6 day),'%Y-%m-%d') THEN 1 end) as Mon,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -5 day),'%Y-%m-%d') THEN 1 end) as Tue,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -4 day),'%Y-%m-%d') THEN 1 end) as Wed,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -3 day),'%Y-%m-%d') THEN 1 end) as Thu,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -2 day),'%Y-%m-%d') THEN 1 end) as Fri,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -1 day),'%Y-%m-%d') THEN 1 end) as Sat,
+        count(CASE WHEN date_format(uploadTime,'%Y-%m-%d') = DATE_FORMAT(DATE_ADD(sysdate(),INTERVAL -0 day),'%Y-%m-%d') THEN 1 end) as Sun
+        from user_file
+        <include refid="adminSelectByExtendName"></include>
+    </select>
+
+
+
+
+</mapper>
