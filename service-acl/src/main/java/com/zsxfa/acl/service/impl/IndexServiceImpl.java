@@ -33,7 +33,6 @@ public class IndexServiceImpl implements IndexService {
 
     /**
      * 根据用户名获取用户登录信息
-     *
      * @param username
      * @return
      */

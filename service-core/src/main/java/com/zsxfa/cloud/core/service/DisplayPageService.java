@@ -15,6 +15,6 @@ public interface DisplayPageService {
     Long search(Long userId);
 
     //图标展示页面数量统计
-    FileSearch adminDisplaySelectCountNotInExtendNames(List<String> fileExtendsByType);
-    FileSearch adminDisplaySelectCountByExtendName(List<String> fileExtendsByType);
+    FileSearch adminDisplaySelectCountNotInExtendNames(List<String> fileExtendsByType, Long userId);
+    FileSearch adminDisplaySelectCountByExtendName(List<String> fileExtendsByType, Long userId);
 }

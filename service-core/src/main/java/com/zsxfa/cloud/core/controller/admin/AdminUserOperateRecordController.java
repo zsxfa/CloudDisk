@@ -48,12 +48,12 @@ public class AdminUserOperateRecordController {
             @ApiParam(value = "用户姓名", required = false)
             @RequestParam(value="userName",required=false) String userName) {
 
-        if (limit == 0 || page == 0) {
-            page = 0L;
-            limit = 10L;
-        } else {
-            page = (page - 1) * limit;
-        }
+//        if (limit == 0 || page == 0) {
+//            page = 0L;
+//            limit = 10L;
+//        } else {
+//            page = (page - 1) * limit;
+//        }
 
         List<Operationlog> userOperateRecordList = null;
         LambdaQueryWrapper<Operationlog> userLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -72,8 +72,8 @@ public class AdminUserOperateRecordController {
             }
         }
         List<UserOperateLog> userOperateRecordDTOList = new ArrayList<>();
-        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
         for (Operationlog list : userOperateRecordList){
+            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
             UserOperateLog userOperateLog = new UserOperateLog();
             userLambdaQueryWrapper.eq(User::getUserId,list.getUserid());
             User user = userService.getOne(userLambdaQueryWrapper);

@@ -124,6 +124,7 @@ public class HDFSServiceImpl implements HDFSService {
 
                 if (relativePath.contains("/")) {
                     userFile.setFilePath(uploadFileDto.getFilePath() + UFOPUtils.getParentPath(relativePath) + "/");
+                    //上传目录
                     fileDealComp.restoreParentFilePath(uploadFileDto.getFilePath() + UFOPUtils.getParentPath(relativePath) + "/", userId);
                     fileDealComp.deleteRepeatSubDirFile(uploadFileDto.getFilePath(), userId);
 

@@ -2,6 +2,7 @@ package com.zsxfa.acl.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zsxfa.acl.mapper.AclRoleMapper;
 import com.zsxfa.acl.pojo.entity.AclRole;
 import com.zsxfa.acl.service.AclRoleService;
 import com.zsxfa.common.result.R;
@@ -11,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -39,11 +43,18 @@ public class RoleController {
             AclRole role) {
         Page<AclRole> pageParam = new Page<>(page, limit);
         QueryWrapper<AclRole> wrapper = new QueryWrapper<>();
+
         if(!StringUtils.isEmpty(role.getRoleName())) {
             wrapper.like("role_name",role.getRoleName());
+            roleService.page(pageParam,wrapper);
+        }else{
+            roleService.page(pageParam,null);
         }
-        roleService.page(pageParam,wrapper);
-        return R.ok().data("items", pageParam.getRecords()).data("total", pageParam.getTotal());
+        System.out.println("总数是："+pageParam.getTotal());
+        Map<String, Object> map = new HashMap<>();
+        map.put("items", pageParam.getRecords());
+        map.put("total", pageParam.getTotal());
+        return R.ok().data(map);
     }
 
     @ApiOperation(value = "获取角色")

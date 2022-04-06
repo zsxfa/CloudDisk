@@ -1,7 +1,6 @@
 package com.zsxfa.cloud.core.controller.api;
 
 
-import com.alibaba.nacos.common.model.RestResult;
 import com.zsxfa.cloud.base.util.JwtUtils;
 import com.zsxfa.cloud.core.pojo.entity.User;
 import com.zsxfa.cloud.core.pojo.vo.LoginVO;
@@ -14,7 +13,6 @@ import com.zsxfa.common.result.ResponseEnum;
 import com.zsxfa.common.util.RegexValidateUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 

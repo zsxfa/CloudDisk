@@ -12,6 +12,6 @@ public interface DisplayPageMapper {
     Long searchToatl(Long userId);
 
     //图标展示页面数量统计
-    FileSearch adminDisplaySelectCountNotInExtendName(List<String> fileNameList);
-    FileSearch adminDisplaySelectCountByExtendName(List<String> fileNameList);
+    FileSearch adminDisplaySelectCountNotInExtendName(List<String> fileNameList, Long userId);
+    FileSearch adminDisplaySelectCountByExtendName(List<String> fileNameList, Long userId);
 }

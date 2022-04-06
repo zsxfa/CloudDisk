@@ -77,8 +77,6 @@ public class AclPermissionServiceImpl extends ServiceImpl<AclPermissionMapper, A
 
         roleAclPermissionService.remove(new QueryWrapper<AclRolePermission>().eq("role_id", roleId));
 
-
-
         List<AclRolePermission> roleAclPermissionList = new ArrayList<>();
         for(String permissionId : permissionIds) {
             if(StringUtils.isEmpty(permissionId)){

@@ -28,11 +28,11 @@ public class DisplayPageServiceImpl implements DisplayPageService {
     }
 
     @Override
-    public FileSearch adminDisplaySelectCountNotInExtendNames(List<String> fileNameList) {
-        return displayPageMapper.adminDisplaySelectCountNotInExtendName(fileNameList);
+    public FileSearch adminDisplaySelectCountNotInExtendNames(List<String> fileNameList, Long userId) {
+        return displayPageMapper.adminDisplaySelectCountNotInExtendName(fileNameList,userId);
     }
     @Override
-    public FileSearch adminDisplaySelectCountByExtendName(List<String> fileNameList) {
-        return displayPageMapper.adminDisplaySelectCountByExtendName(fileNameList);
+    public FileSearch adminDisplaySelectCountByExtendName(List<String> fileNameList, Long userId) {
+        return displayPageMapper.adminDisplaySelectCountByExtendName(fileNameList,userId);
     }
 }

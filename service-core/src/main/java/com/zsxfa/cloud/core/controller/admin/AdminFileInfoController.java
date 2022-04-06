@@ -166,12 +166,12 @@ public class AdminFileInfoController {
             }
             count = (long)userFileService.count(userFileLambdaQueryWrapper);
         }else{
-            if (limit == 0 || page == 0) {
-                page = 0L;
-                limit = 10L;
-            } else {
-                page = (page - 1) * limit;
-            }
+//            if (limit == 0 || page == 0) {
+//                page = 0L;
+//                limit = 10L;
+//            } else {
+//                page = (page - 1) * limit;
+//            }
             if (fileType == UFOPUtils.OTHER_TYPE) {
                 List<String> arrList = new ArrayList<>();
                 arrList.addAll(Arrays.asList(UFOPUtils.DOC_FILE));
@@ -187,7 +187,7 @@ public class AdminFileInfoController {
                     count = userFileService.adminSelectCountNotInExtendNames(arrList,page, limit, isAdmin);
                 }
             } else {
-                if(isAdmin == null) {
+                if(isAdmin == null) {//admin用户
                     searchUserFileList = userFileService.adminSelectFileByExtendName(UFOPUtils.getFileExtendsByType(fileType), page, limit, null);
                     count = userFileService.adminSelectCountByExtendName(UFOPUtils.getFileExtendsByType(fileType), page, limit, null);
                 }else{
@@ -322,9 +322,17 @@ public class AdminFileInfoController {
                 arrList.addAll(Arrays.asList(UFOPUtils.IMG_FILE));
                 arrList.addAll(Arrays.asList(UFOPUtils.VIDEO_FILE));
                 arrList.addAll(Arrays.asList(UFOPUtils.MUSIC_FILE));
-                fileSearch = displayPageService.adminDisplaySelectCountNotInExtendNames(arrList);
+                if(isAdmin == null){
+                    fileSearch = displayPageService.adminDisplaySelectCountNotInExtendNames(arrList, null);
+                }else{
+                    fileSearch = displayPageService.adminDisplaySelectCountNotInExtendNames(arrList, isAdmin);
+                }
             } else {
-                fileSearch = displayPageService.adminDisplaySelectCountByExtendName(UFOPUtils.getFileExtendsByType(i));
+                if(isAdmin == null){
+                    fileSearch = displayPageService.adminDisplaySelectCountByExtendName(UFOPUtils.getFileExtendsByType(i), null);
+                }else{
+                    fileSearch = displayPageService.adminDisplaySelectCountByExtendName(UFOPUtils.getFileExtendsByType(i), isAdmin);
+                }
             }
 
             System.out.println("fileSearch是：" + fileSearch);
