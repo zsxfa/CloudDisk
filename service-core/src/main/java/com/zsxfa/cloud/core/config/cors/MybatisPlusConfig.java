@@ -19,6 +19,8 @@ public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();
+        paginationInnerInterceptor.setOverflow(true);
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));//分页
         return interceptor;
     }

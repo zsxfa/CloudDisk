@@ -2,6 +2,7 @@ package com.zsxfa.cloud.core.controller.api;
 
 
 import com.zsxfa.cloud.base.util.JwtUtils;
+import com.zsxfa.cloud.core.aop.MyLog;
 import com.zsxfa.cloud.core.pojo.entity.User;
 import com.zsxfa.cloud.core.pojo.vo.LoginVO;
 import com.zsxfa.cloud.core.pojo.vo.RegisterVO;
@@ -36,7 +37,10 @@ public class UserController {
     @Resource
     RedisTemplate redisTemplate;
 
+    public static final String CURRENT_MODULE = "用户管理";
+
     @ApiOperation(value = "会员注册")
+//    @MyLog(operation = "用户注册", module = CURRENT_MODULE)
     @PostMapping("/register")
     public R register(@RequestBody RegisterVO registerVO){
 
@@ -64,6 +68,7 @@ public class UserController {
     }
 
     @ApiOperation("用户登录")
+//    @MyLog(operation = "用户登录", module = CURRENT_MODULE)
     @PostMapping("/login")
     @ResponseBody
     public R login(@RequestBody LoginVO loginVO, HttpServletRequest request) {
@@ -96,5 +101,12 @@ public class UserController {
         }
 
     }
+
+    @ApiOperation("校验手机号是否注册")
+    @GetMapping("/checkMobile/{mobile}")
+    public Boolean checkMobile(@PathVariable String mobile){
+        return userService.checkMobile(mobile);
+    }
+
 }
 

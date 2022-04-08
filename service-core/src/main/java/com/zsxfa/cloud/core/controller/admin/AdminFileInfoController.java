@@ -76,6 +76,15 @@ public class AdminFileInfoController {
         //判断是否是管理员
         Long isAdmin = judgeRole(username);
         List<FileListVo> fileList = null;
+//        Long beginCount = 0L;
+//        if (pageCount == 0 || currentPage == 0) {
+//            beginCount = 0L;
+//            pageCount = 10L;
+//        } else {
+//            beginCount = (currentPage - 1) * pageCount;
+//        }
+        if(page > 0) page = (page - 1) * limit;
+        System.out.println("---admin---现在的page是："+page);
         if(isAdmin != 0){
             fileList = userFileService.adminFileList(page, limit, null);
             for(FileListVo listVo : fileList){
@@ -120,14 +129,16 @@ public class AdminFileInfoController {
 
         List<FileListVo> searchUserFileList = new ArrayList<>();
         Long count = 0L;
-
+//        if(page > 0) page = (page - 1) * limit;
+        System.out.println("-------------现在的page是："+page);
         if(fileType == null){
-            if(isAdmin == null){//表示是admin
-                Page<UserFile> userFilePage = userFileService.searchFileList(page, limit, fileName, null);
+//            if(isAdmin == null){//表示是admin
+                Page<UserFile> userFilePage = userFileService.searchFileList(page, limit, fileName, isAdmin);
                 List<UserFile> records = userFilePage.getRecords();
+                System.out.println("records:"+records);
                 for (int i = 0; i < records.size(); i++) {
                     Long userId = records.get(i).getUserId();
-                    Long fileId = records.get(i).getFileId();
+                    Long  fileId = records.get(i).getFileId();
                     User user = userFileService.getUserInfo(userId, fileId);
                     File file = fileService.getFileInfo(fileId);
 
@@ -141,24 +152,6 @@ public class AdminFileInfoController {
                     listVo.setUserName(user.getUsername());
                     searchUserFileList.add(listVo);
                 }
-            }else{
-                Page<UserFile> userFilePage = userFileService.searchFileList(page, limit, fileName, isAdmin);
-                List<UserFile> records = userFilePage.getRecords();
-                for (int i = 0; i < records.size(); i++) {
-                    Long fileId = records.get(i).getFileId();
-                    File file = fileService.getFileInfo(fileId);
-
-                    FileListVo listVo = new FileListVo();
-                    listVo.setFileId(records.get(i).getUserFileId());
-                    listVo.setFileName(records.get(i).getFileName());
-                    listVo.setFileSize(file.getFileSize());
-                    listVo.setExtendName(records.get(i).getExtendName());
-                    listVo.setUploadTime(records.get(i).getUploadTime());
-                    listVo.setFilePath(records.get(i).getFilePath());
-                    listVo.setUserName(username);
-                    searchUserFileList.add(listVo);
-                }
-            }
             LambdaQueryWrapper<UserFile> userFileLambdaQueryWrapper = new LambdaQueryWrapper<>();
             userFileLambdaQueryWrapper.eq(UserFile::getIsDir,0);
             if(isAdmin != null){//表示是普通用户
@@ -166,12 +159,7 @@ public class AdminFileInfoController {
             }
             count = (long)userFileService.count(userFileLambdaQueryWrapper);
         }else{
-//            if (limit == 0 || page == 0) {
-//                page = 0L;
-//                limit = 10L;
-//            } else {
-//                page = (page - 1) * limit;
-//            }
+            if(page > 0) page = (page - 1) * limit;
             if (fileType == UFOPUtils.OTHER_TYPE) {
                 List<String> arrList = new ArrayList<>();
                 arrList.addAll(Arrays.asList(UFOPUtils.DOC_FILE));
@@ -301,7 +289,7 @@ public class AdminFileInfoController {
                 displayPage.setOtherCount(count);
             }
         }
-
+        //折线图数据
         String[] arr = new String[7];
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar c = null;

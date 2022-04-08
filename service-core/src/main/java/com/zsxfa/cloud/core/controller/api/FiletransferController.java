@@ -4,9 +4,8 @@ package com.zsxfa.cloud.core.controller.api;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.qiwenshare.common.anno.MyLog;
-import com.qiwenshare.common.util.DateUtil;
 import com.qiwenshare.common.util.MimeUtils;
+import com.zsxfa.cloud.core.aop.MyLog;
 import com.zsxfa.cloud.core.component.FileDealComp;
 import com.zsxfa.cloud.core.config.fileConf.constant.UploadFileStatusEnum;
 import com.zsxfa.cloud.core.config.fileConf.util.UFOPUtils;
@@ -20,6 +19,7 @@ import com.zsxfa.cloud.core.pojo.vo.UploadFileVo;
 import com.zsxfa.cloud.core.service.*;
 import com.zsxfa.common.exception.DefinedException;
 import com.zsxfa.common.result.R;
+import com.zsxfa.common.util.DateUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,10 +64,10 @@ public class FiletransferController {
     FileDealComp fileDealComp;
     @Resource
     UploadTaskDetailService uploadTaskDetailService;
-
-
     @Resource
     UserFileMapper userFileMapper;
+
+    public static final String CURRENT_MODULE = "文件传输接口";
 
     @ApiOperation("获取存储信息")
     @RequestMapping(value = "/getstorage", method = RequestMethod.GET)
@@ -93,6 +93,7 @@ public class FiletransferController {
     }
 
     @Operation(summary = "极速上传", description = "校验文件MD5判断文件是否存在，如果存在直接上传成功并返回skipUpload=true，如果不存在返回skipUpload=false需要再次调用该接口的POST方法", tags = {"filetransfer"})
+    @MyLog(operation = "极速上传", module = CURRENT_MODULE)
     @RequestMapping(value = "/uploadfile", method = RequestMethod.GET)
     @ResponseBody
     public R uploadFileSpeed(UploadFileDTO uploadFileDto, @RequestHeader("token") String token) {
@@ -150,6 +151,7 @@ public class FiletransferController {
     }
 
     @ApiOperation("上传文件")
+    @MyLog(operation = "上传文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/uploadfile", method = RequestMethod.POST)
     @ResponseBody
     public R uploadFile(HttpServletRequest request, UploadFileDTO uploadFileDto, @RequestHeader("token") String token) {
@@ -181,6 +183,7 @@ public class FiletransferController {
     }
 
     @ApiOperation("下载文件")
+    @MyLog(operation = "下载文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/downloadfile", method = RequestMethod.GET)
     public void downloadFile(HttpServletResponse httpServletResponse, DownloadFileDTO downloadFileDTO) {
         httpServletResponse.setContentType("application/force-download");// 设置强制下载不打开
@@ -209,7 +212,6 @@ public class FiletransferController {
     @GetMapping("/preview")
     public void preview(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, PreviewDTO previewDTO){
         UserFile userFile = userFileService.getById(previewDTO.getUserFileId());
-
 
         File fileBean = fileService.getById(userFile.getFileId());
         String mime= MimeUtils.getMime(userFile.getExtendName());

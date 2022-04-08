@@ -18,6 +18,9 @@
         <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
             #{fileName}
         </foreach>
+        <if test="userId != null">
+            and user_file.userId = #{userId}
+        </if>
         and deleteFlag = 0
     </sql>
     <select id="adminDisplaySelectCountNotInExtendName" resultType="com.zsxfa.cloud.core.pojo.dto.view.FileSearch">
@@ -39,6 +42,9 @@
         <foreach collection="fileNameList" open="(" close=")" separator="," item="fileName" >
             #{fileName}
         </foreach>
+        <if test="userId != null">
+            and user_file.userId = #{userId}
+        </if>
         and deleteFlag = 0
     </sql>
     <select id="adminDisplaySelectCountByExtendName" resultType="com.zsxfa.cloud.core.pojo.dto.view.FileSearch">

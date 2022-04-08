@@ -48,12 +48,12 @@ public class AdminUserOperateRecordController {
             @ApiParam(value = "用户姓名", required = false)
             @RequestParam(value="userName",required=false) String userName) {
 
-//        if (limit == 0 || page == 0) {
-//            page = 0L;
-//            limit = 10L;
-//        } else {
-//            page = (page - 1) * limit;
-//        }
+        if (limit == 0 || page == 0) {
+            page = 0L;
+            limit = 10L;
+        } else {
+            page = (page - 1) * limit;
+        }
 
         List<Operationlog> userOperateRecordList = null;
         LambdaQueryWrapper<Operationlog> userLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -62,7 +62,7 @@ public class AdminUserOperateRecordController {
         }else{
             //先通过username查到userid
             LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.eq(User::getUsername,userName);
+            userLambdaQueryWrapper.like(User::getUsername,userName);
             User user = userService.getOne(userLambdaQueryWrapper);
             if(user != null){
                 userOperateRecordList = operationlogService.userOperateList(page, limit, user.getUserId());

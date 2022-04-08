@@ -6,8 +6,10 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.qiwenshare.common.exception.NotLoginException;
+import com.zsxfa.cloud.base.util.JwtUtils;
 import com.zsxfa.cloud.base.util.SessionUtil;
 import com.zsxfa.cloud.base.util.UFOPUtils;
+import com.zsxfa.cloud.core.aop.MyLog;
 import com.zsxfa.cloud.core.component.FileDealComp;
 import com.zsxfa.cloud.core.pojo.dto.file.*;
 import com.zsxfa.cloud.core.pojo.entity.TreeNode;
@@ -24,6 +26,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -43,29 +46,40 @@ public class FileController {
     @Resource
     FileDealComp fileDealComp;
 
+    public static final String CURRENT_MODULE = "文件接口";
+
     @ApiOperation("获取文件列表")
+    @MyLog(operation = "批量删除文件", module = CURRENT_MODULE)
     @PostMapping("/list/getfilelist")
     @ResponseBody
-    public R getFileList(@RequestBody FileQuery fileQuery){
+    public R getFileList(@RequestBody FileQuery fileQuery, HttpServletRequest request){
 
         String filePath = fileQuery.getFilePath();
         Long currentPage = fileQuery.getCurrentPage();
         Long pageCount = fileQuery.getPageCount();
 
         UserFile userFile = new UserFile();
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+//        User sessionUserBean = (User) SessionUtil.getSession();
+        if(userId == null){
             throw new NotLoginException();
         }
+        userFile.setUserId(userId);
 
-        userFile.setUserId(sessionUserBean.getUserId());
+        Long beginCount = 0L;
+        if (pageCount == 0 || currentPage == 0) {
+            beginCount = 0L;
+            pageCount = 10L;
+        } else {
+            beginCount = (currentPage - 1) * pageCount;
+        }
 
         List<FileListVo> fileList = null;
         userFile.setFilePath(UFOPUtils.urlDecode(filePath));
         if (currentPage == 0 || pageCount == 0) {
-            fileList = userFileService.userFileList(userFile, 0L, 10L);
+            fileList = userFileService.userFileList(userFile, beginCount, pageCount);
         } else {
-            long beginCount = (currentPage - 1) * pageCount;
             fileList = userFileService.userFileList(userFile, beginCount, pageCount);
         }
 
@@ -86,17 +100,16 @@ public class FileController {
     @ApiOperation("通过文件类型选择文件")
     @PostMapping("/list/selectfilebyfiletype")
     @ResponseBody
-    public R selectFileByFileType(@RequestBody FileQuery fileQuery) {
+    public R selectFileByFileType(@RequestBody FileQuery fileQuery, HttpServletRequest request) {
         Integer fileType = fileQuery.getFileType();
         Long currentPage = fileQuery.getCurrentPage();
         Long pageCount = fileQuery.getPageCount();
 
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
-        long userId = sessionUserBean.getUserId();
-
         List<FileListVo> fileList = new ArrayList<>();
         Long beginCount = 0L;
         if (pageCount == 0 || currentPage == 0) {
@@ -128,55 +141,59 @@ public class FileController {
     }
 
     @ApiOperation("删除文件")
+    @MyLog(operation = "删除文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/deletefile", method = RequestMethod.POST)
     @ResponseBody
-    public R deleteFile(@RequestBody DeleteFileDTO deleteFileDto) {
+    public R deleteFile(@RequestBody DeleteFileDTO deleteFileDto, HttpServletRequest request) {
 
-        User sessionUser = (User) SessionUtil.getSession();
-        if (sessionUser == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
-        userFileService.deleteUserFile(deleteFileDto.getUserFileId(), sessionUser.getUserId());
+        userFileService.deleteUserFile(deleteFileDto.getUserFileId(), userId);
 
         return R.ok();
     }
 
     @ApiOperation("批量删除文件")
+    @MyLog(operation = "批量删除文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/batchdeletefile", method = RequestMethod.POST)
     @ResponseBody
-    public R deleteImageByIds(@RequestBody BatchDeleteFileDTO batchDeleteFileDto) {
+    public R deleteImageByIds(@RequestBody BatchDeleteFileDTO batchDeleteFileDto, HttpServletRequest request) {
 
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
         List<UserFile> userFiles = JSON.parseArray(batchDeleteFileDto.getFiles(), UserFile.class);
         DigestUtils.md5Hex("data");
-        System.out.println("161行的userFiles是："+userFiles);
-        System.out.println("161行的userFiles个数是："+userFiles.size());
         for (UserFile userFile : userFiles) {
-            userFileService.deleteUserFile(userFile.getUserFileId(),sessionUserBean.getUserId());
+            userFileService.deleteUserFile(userFile.getUserFileId(),userId);
         }
 
         return R.ok().message("批量删除文件成功");
     }
 
     @ApiOperation("创建文件夹")
+    @MyLog(operation = "创建文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/createfile", method = RequestMethod.POST)
     @ResponseBody
-    public R createFile( @RequestBody CreateFileDTO createFileDto) {
+    public R createFile( @RequestBody CreateFileDTO createFileDto, HttpServletRequest request) {
 
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
-        boolean isDirExist = userFileService.isDirExist(createFileDto.getFileName(), createFileDto.getFilePath(), sessionUserBean.getUserId());
+        boolean isDirExist = userFileService.isDirExist(createFileDto.getFileName(), createFileDto.getFilePath(), userId);
 
         if (isDirExist) {
             return R.error().message("同名文件已存在");
         }
         UserFile userFile = new UserFile();
-        userFile.setUserId(sessionUserBean.getUserId());
+        userFile.setUserId(userId);
         userFile.setFileName(createFileDto.getFileName());
         userFile.setFilePath(createFileDto.getFilePath());
         userFile.setDeleteFlag(0);
@@ -188,12 +205,14 @@ public class FileController {
     }
 
     @ApiOperation("文件移动")
+    @MyLog(operation = "文件移动", module = CURRENT_MODULE)
     @RequestMapping(value = "/movefile", method = RequestMethod.POST)
     @ResponseBody
-    public R moveFile(@RequestBody MoveFileDTO moveFileDto) {
+    public R moveFile(@RequestBody MoveFileDTO moveFileDto, HttpServletRequest request) {
 
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
         String oldfilePath = moveFileDto.getOldFilePath();
@@ -206,18 +225,20 @@ public class FileController {
                 return R.error().message("原路径与目标路径冲突，不能移动");
             }
         }
-        userFileService.updateFilepathByFilepath(oldfilePath, newfilePath, fileName, extendName, sessionUserBean.getUserId());
+        userFileService.updateFilepathByFilepath(oldfilePath, newfilePath, fileName, extendName, userId);
         return R.ok();
 
     }
 
     @ApiOperation("批量移动文件")
+    @MyLog(operation = "批量移动文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/batchmovefile", method = RequestMethod.POST)
     @ResponseBody
-    public R batchMoveFile(@RequestBody BatchMoveFileDTO batchMoveFileDto) {
+    public R batchMoveFile(@RequestBody BatchMoveFileDTO batchMoveFileDto, HttpServletRequest request) {
 
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
         String files = batchMoveFileDto.getFiles();
@@ -232,7 +253,7 @@ public class FileController {
                     return R.error().message("原路径与目标路径冲突，不能移动");
                 }
             }
-            userFileService.updateFilepathByFilepath(userFile.getFilePath(), newfilePath, userFile.getFileName(), userFile.getExtendName(), sessionUserBean.getUserId());
+            userFileService.updateFilepathByFilepath(userFile.getFilePath(), newfilePath, userFile.getFileName(), userFile.getExtendName(), userId);
         }
         return R.ok().message("批量移动文件成功");
 
@@ -241,12 +262,13 @@ public class FileController {
     @ApiOperation("获取文件树,文件移动的时候需要用到该接口")
     @RequestMapping(value = "/getfiletree", method = RequestMethod.GET)
     @ResponseBody
-    public R getFileTree() {
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+    public R getFileTree(HttpServletRequest request) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
-        List<UserFile> userFileList = userFileService.selectFilePathTreeByUserId(sessionUserBean.getUserId());
+        List<UserFile> userFileList = userFileService.selectFilePathTreeByUserId(userId);
         TreeNode resultTreeNode = new TreeNode();
         resultTreeNode.setLabel("/");
         resultTreeNode.setId(0L);
@@ -280,16 +302,18 @@ public class FileController {
     }
 
     @ApiOperation("文件重命名")
+    @MyLog(operation = "文件重命名", module = CURRENT_MODULE)
     @RequestMapping(value = "/renamefile", method = RequestMethod.POST)
     @ResponseBody
-    public R renameFile(@RequestBody RenameFileDTO renameFileDto) {
+    public R renameFile(@RequestBody RenameFileDTO renameFileDto, HttpServletRequest request) {
 
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
         UserFile userFile = userFileService.getById(renameFileDto.getUserFileId());
-        List<UserFile> userFiles = userFileService.selectUserFileByNameAndPath(renameFileDto.getFileName(), userFile.getFilePath(), sessionUserBean.getUserId());
+        List<UserFile> userFiles = userFileService.selectUserFileByNameAndPath(renameFileDto.getFileName(), userFile.getFilePath(), userId);
         if (userFiles != null && !userFiles.isEmpty()) {
             return R.error().message("同名文件已存在");
         }
@@ -301,21 +325,23 @@ public class FileController {
         userFileService.update(lambdaUpdateWrapper);
         if (1 == userFile.getIsDir()) {
             userFileService.replaceUserFilePath(userFile.getFilePath() + renameFileDto.getFileName() + "/",
-                    userFile.getFilePath() + userFile.getFileName() + "/", sessionUserBean.getUserId());
+                    userFile.getFilePath() + userFile.getFileName() + "/", userId);
         }
         return R.ok();
     }
 
     @ApiOperation("文件搜索")
+    @MyLog(operation = "文件搜索", module = CURRENT_MODULE)
     @GetMapping(value = "/search")
     @ResponseBody
-    public R searchFile(SearchFileDTO searchFileDTO) {
-        User sessionUserBean = (User) SessionUtil.getSession();
-        if (sessionUserBean == null) {
+    public R searchFile(SearchFileDTO searchFileDTO, HttpServletRequest request) {
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
             throw new NotLoginException();
         }
         UserFile userFile = new UserFile();
-        userFile.setUserId(sessionUserBean.getUserId());
+        userFile.setUserId(userId);
         userFile.setFileName(searchFileDTO.getFileName());
 
         //设置分页

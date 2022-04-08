@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
  * @author zsxfa
  */
 @SpringBootApplication
-@ComponentScan({"com.zsxfa.cloud","com.zsxfa.cloud.base","com.zsxfa.common"})
+@ComponentScan({"com.zsxfa.cloud.*","com.zsxfa.cloud.base","com.zsxfa.common"})
 public class ServiceCoreApplication {
 
     public static void main(String[] args) {

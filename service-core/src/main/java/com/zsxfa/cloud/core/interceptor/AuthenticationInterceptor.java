@@ -28,18 +28,18 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 取得token
-        String token = request.getHeader("token");//HttpHeaders.AUTHORIZATION
-        if("undefined".equals(token) || StringUtils.isEmpty(token)){
-            token=request.getParameter("token不存在");
-        }
-        if ("undefined".equals(token) || StringUtils.isEmpty(token)) {
-            throw new DefinedException("token不存在");
-        }
-        User userBean = userService.getUserByToken(token);
-        SessionUtil.setSession(userBean);
-        if (userBean == null) {
-            throw new DefinedException();
-        }
+//        String token = request.getHeader("token");//HttpHeaders.AUTHORIZATION
+//        if("undefined".equals(token) || StringUtils.isEmpty(token)){
+//            token=request.getParameter("token不存在");
+//        }
+//        if ("undefined".equals(token) || StringUtils.isEmpty(token)) {
+//            throw new DefinedException("token不存在");
+//        }
+//        User userBean = userService.getUserByToken(token);
+//        SessionUtil.setSession(userBean);
+//        if (userBean == null) {
+//            throw new DefinedException();
+//        }
         return true;
     }
 

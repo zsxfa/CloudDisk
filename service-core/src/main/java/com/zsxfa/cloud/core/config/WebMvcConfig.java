@@ -23,16 +23,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 		List<String> list = new ArrayList<>();
 		list.add("/api/core/file/**");
-		list.add("/api/core/filetransfer/**");
-		list.add("/api/corerecoveryfile/**");
-//		list.add("/api/core/share/sharefile");
-//		list.add("/api/core/share/savesharefile");
-//		list.add("/api/core/share/shareList");
+		list.add("/api/core/hdfs/**");
+		list.add("/api/core/recoveryfile/**");
+//		list.add("/api/core/user/**");
 		registry.addInterceptor(authenticationInterceptor)
 			.addPathPatterns(list)
-			.excludePathPatterns("/file",
-					"/filetransfer/downloadfile",
-					"/filetransfer/preview");
+			.excludePathPatterns("/api/core/user/checkuserlogininfo",
+					"/api/core/hdfs/downloadfile",
+					"/api/core/hdfs/preview");
 	}
 
 }

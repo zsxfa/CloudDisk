@@ -138,6 +138,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userMapper.selectPage(p, userLogLambdaQueryWrapper);
     }
 
+    @Override
+    public Boolean checkMobile(String mobile) {
+        QueryWrapper<User> userInfoQueryWrapper = new QueryWrapper<>();
+        userInfoQueryWrapper.eq("telephone",mobile);
+        Integer count = baseMapper.selectCount(userInfoQueryWrapper);
+        return count > 0;
+    }
+
     /**
      * 通过用户id获取用户信息
      */

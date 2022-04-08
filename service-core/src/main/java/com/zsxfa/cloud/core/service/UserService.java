@@ -31,4 +31,6 @@ public interface UserService extends IService<User> {
     //查找用户
     Page<User> searchUserList(Long page, Long limit, String userName, String telephone);
 
+    Boolean checkMobile(String mobile);
+
 }

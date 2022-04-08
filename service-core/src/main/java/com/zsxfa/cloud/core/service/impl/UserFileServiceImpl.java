@@ -229,8 +229,10 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
             userLogLambdaQueryWrapper.eq(UserFile::getUserId, userId);
         }
         userLogLambdaQueryWrapper.eq(UserFile::getIsDir,0);
+        System.out.println(page);
+        System.out.println(limit);
         Page<UserFile> p = new Page<>(page,limit);
-        return userFileMapper.selectPage(p, userLogLambdaQueryWrapper);
+        return baseMapper.selectPage(p, userLogLambdaQueryWrapper);
     }
 
     @Override

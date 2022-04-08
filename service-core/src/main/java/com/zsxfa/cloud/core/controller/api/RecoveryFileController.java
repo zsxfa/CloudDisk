@@ -2,6 +2,7 @@ package com.zsxfa.cloud.core.controller.api;
 
 import com.alibaba.fastjson.JSON;
 import com.qiwenshare.common.exception.NotLoginException;
+import com.zsxfa.cloud.core.aop.MyLog;
 import com.zsxfa.cloud.core.pojo.dto.file.DeleteRecoveryFileDTO;
 import com.zsxfa.cloud.core.pojo.dto.recoveryfile.BatchDeleteRecoveryFileDTO;
 import com.zsxfa.cloud.core.pojo.dto.recoveryfile.RestoreFileDTO;
@@ -62,6 +63,7 @@ public class RecoveryFileController {
 
 
     @ApiOperation("还原文件")
+    @MyLog(operation = "还原文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/restorefile", method = RequestMethod.POST)
     @ResponseBody
     public R restoreFile(@RequestBody RestoreFileDTO restoreFileDto, @RequestHeader("token") String token) {
@@ -74,6 +76,7 @@ public class RecoveryFileController {
     }
 
     @ApiOperation("删除回收站文件")
+    @MyLog(operation = "删除回收文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/deleterecoveryfile", method = RequestMethod.POST)
     @ResponseBody
     public R deleteRecoveryFile(@RequestBody DeleteRecoveryFileDTO deleteRecoveryFileDTO, @RequestHeader("token") String token) {
@@ -93,6 +96,7 @@ public class RecoveryFileController {
     }
 
     @ApiOperation("批量删除回收文件")
+    @MyLog(operation = "批量删除回收文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/batchdelete", method = RequestMethod.POST)
     @ResponseBody
     public R batchDeleteRecoveryFile(@RequestBody BatchDeleteRecoveryFileDTO batchDeleteRecoveryFileDTO, @RequestHeader("token") String token) {

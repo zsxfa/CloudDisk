@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.executor.ResultExtractor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,8 +50,10 @@ public class ApiSmsController {
         //判断手机号是否已经注册
         boolean result = coreUserInfoClient.checkMobile(mobile);
         log.info("result:"+result);
-        Assert.isTrue(result == false, ResponseEnum.MOBILE_EXIST_ERROR);
-
+//        Assert.isTrue(result == false, ResponseEnum.MOBILE_EXIST_ERROR);
+        if(result){
+            return R.error().message("手机号已被注册");
+        }
         HashMap<String, Object> map = new HashMap<>();
         String code = RandomUtils.getFourBitRandom();
         map.put("code", code);
