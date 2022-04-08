@@ -42,11 +42,3 @@ logging:
   level:
     com.zsxfa.cloud.sms.client.CoreUserClient: DEBUG #以什么级别监控哪个接口
 
-#阿里云短信
-#aliyun:
-#  sms:
-#    region-id: cn-hangzhou
-#    key-id: LTAI4G5Svnb2TWBMuKnNT6jY
-#    key-secret: N7v6R4V3EJ1SGDZlsqtqo8QyVVMmtQ
-#    template-code: SMS_96695065
-#    sign-name:
