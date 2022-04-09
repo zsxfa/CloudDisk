@@ -62,7 +62,7 @@ public class AdminUserOperateRecordController {
         }else{
             //先通过username查到userid
             LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.like(User::getUsername,userName);
+            userLambdaQueryWrapper.eq(User::getUsername,userName);
             User user = userService.getOne(userLambdaQueryWrapper);
             if(user != null){
                 userOperateRecordList = operationlogService.userOperateList(page, limit, user.getUserId());

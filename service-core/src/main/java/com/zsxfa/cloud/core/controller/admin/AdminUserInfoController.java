@@ -58,8 +58,13 @@ public class AdminUserInfoController {
 
             @ApiParam(value = "用户姓名", required = false)
             @RequestParam(value="userName",required=false) String userName) {
-
-        Page<User> list = userService.searchUserList(page-1, limit, userName, telephone);
+        if (limit == 0 || page == 0) {
+            page = 0L;
+            limit = 10L;
+        } else {
+            page = (page - 1) * limit;
+        }
+        Page<User> list = userService.searchUserList(page, limit, userName, telephone);
 
         Map<String, Object> map = new HashMap<>();
         map.put("list", list.getRecords());

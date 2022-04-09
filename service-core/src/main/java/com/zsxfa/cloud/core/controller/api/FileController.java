@@ -157,7 +157,7 @@ public class FileController {
     }
 
     @ApiOperation("批量删除文件")
-    @MyLog(operation = "批量删除文件", module = CURRENT_MODULE)
+//    @MyLog(operation = "批量删除文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/batchdeletefile", method = RequestMethod.POST)
     @ResponseBody
     public R deleteImageByIds(@RequestBody BatchDeleteFileDTO batchDeleteFileDto, HttpServletRequest request) {

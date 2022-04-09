@@ -4,7 +4,9 @@ package com.zsxfa.cloud.core.controller.api;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.qiwenshare.common.exception.NotLoginException;
 import com.qiwenshare.common.util.MimeUtils;
+import com.zsxfa.cloud.base.util.JwtUtils;
 import com.zsxfa.cloud.core.aop.MyLog;
 import com.zsxfa.cloud.core.component.FileDealComp;
 import com.zsxfa.cloud.core.config.fileConf.constant.UploadFileStatusEnum;
@@ -96,11 +98,16 @@ public class FiletransferController {
     @MyLog(operation = "极速上传", module = CURRENT_MODULE)
     @RequestMapping(value = "/uploadfile", method = RequestMethod.GET)
     @ResponseBody
-    public R uploadFileSpeed(UploadFileDTO uploadFileDto, @RequestHeader("token") String token) {
+    public R uploadFileSpeed(UploadFileDTO uploadFileDto, HttpServletRequest request) {
 
-        User sessionUserBean = userService.getUserByToken(token);
+//        User sessionUserBean = userService.getUserByToken(token);
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
+            throw new NotLoginException();
+        }
 
-        boolean isCheckSuccess = storageService.checkStorage(sessionUserBean.getUserId(), uploadFileDto.getTotalSize());
+        boolean isCheckSuccess = storageService.checkStorage(userId, uploadFileDto.getTotalSize());
         if (!isCheckSuccess) {
             return R.error().message("存储空间不足");
         }
@@ -113,12 +120,12 @@ public class FiletransferController {
         if (list != null && !list.isEmpty()) {
             File file = list.get(0);
                 UserFile userFile = new UserFile();
-                userFile.setUserId(sessionUserBean.getUserId());
+                userFile.setUserId(userId);
                 String relativePath = uploadFileDto.getRelativePath();
                 if (relativePath.contains("/")) {
                     userFile.setFilePath(uploadFileDto.getFilePath() + UFOPUtils.getParentPath(relativePath) + "/");
-                    fileDealComp.restoreParentFilePath(uploadFileDto.getFilePath() + UFOPUtils.getParentPath(relativePath) + "/", sessionUserBean.getUserId());
-                    fileDealComp.deleteRepeatSubDirFile(uploadFileDto.getFilePath(), sessionUserBean.getUserId());
+                    fileDealComp.restoreParentFilePath(uploadFileDto.getFilePath() + UFOPUtils.getParentPath(relativePath) + "/", userId);
+                    fileDealComp.deleteRepeatSubDirFile(uploadFileDto.getFilePath(), userId);
                 } else {
                     userFile.setFilePath(uploadFileDto.getFilePath());
                 }
@@ -154,13 +161,18 @@ public class FiletransferController {
     @MyLog(operation = "上传文件", module = CURRENT_MODULE)
     @RequestMapping(value = "/uploadfile", method = RequestMethod.POST)
     @ResponseBody
-    public R uploadFile(HttpServletRequest request, UploadFileDTO uploadFileDto, @RequestHeader("token") String token) {
+    public R uploadFile(HttpServletRequest request, UploadFileDTO uploadFileDto) {
 
-        User sessionUserBean = userService.getUserByToken(token);
-        if (sessionUserBean == null) {
-            throw new DefinedException("未登录");
+//        User sessionUserBean = userService.getUserByToken(token);
+//        if (sessionUserBean == null) {
+//            throw new DefinedException("未登录");
+//        }
+        String token = request.getHeader("token");
+        Long userId = JwtUtils.getUserId(token);
+        if(userId == null){
+            throw new NotLoginException();
         }
-        hdfsService.uploadFile(request, uploadFileDto, sessionUserBean.getUserId());
+        hdfsService.uploadFile(request, uploadFileDto, userId);
 //        filetransferService.uploadFile(request, uploadFileDto, sessionUserBean.getUserId());
 
         //做文件夹去重操作
@@ -168,13 +180,13 @@ public class FiletransferController {
                 .select("distinct filePath")
                 .eq("isDir", 1)
                 .eq("deleteFlag", 0)
-                .eq("userId", sessionUserBean.getUserId());
+                .eq("userId", userId);
 
         List<UserFile> reFile = userFileMapper.selectList(distinct_filePath);
 
 
         for (UserFile userFile : reFile){
-            fileDealComp.deleteRepeatSubDirFile(userFile.getFilePath(),sessionUserBean.getUserId());
+            fileDealComp.deleteRepeatSubDirFile(userFile.getFilePath(),userId);
         }
 
         UploadFileVo uploadFileVo = new UploadFileVo();

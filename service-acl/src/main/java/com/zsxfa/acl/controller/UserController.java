@@ -46,6 +46,7 @@ public class UserController {
 
             @ApiParam(name = "courseQuery", value = "查询对象", required = false)
                     User userQueryVo) {
+
         Page<User> pageParam = new Page<>(page, limit);
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         if(!StringUtils.isEmpty(userQueryVo.getUsername())) {

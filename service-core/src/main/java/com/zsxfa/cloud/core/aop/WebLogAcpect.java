@@ -1,6 +1,7 @@
 package com.zsxfa.cloud.core.aop;
 
 import com.zsxfa.cloud.base.util.JwtUtils;
+import com.zsxfa.cloud.base.util.SessionUtil;
 import com.zsxfa.cloud.core.config.OperationLogUtil;
 import com.zsxfa.cloud.core.pojo.entity.User;
 import com.zsxfa.cloud.core.service.OperationlogService;
@@ -83,18 +84,25 @@ public class WebLogAcpect {
         if (ret instanceof R) {
             boolean isSuccess = ((R) ret).getSuccess();
             String errorMessage = ((R) ret).getMessage();
-//            User sessionUserBean = userService.getUserByToken(token);
+
             String token = request.getHeader("token");
-            User userByToken = userService.getUserByToken(token);
-
-            if (isSuccess) {
-
-                operationLogService.insertOperationLog(
-                        OperationLogUtil.getOperationLogObj(request,userByToken, "成功", module, operation, "操作成功"));
-            } else {
-                operationLogService.insertOperationLog(
-                        OperationLogUtil.getOperationLogObj(request,userByToken, "失败", module, operation, errorMessage));
+            if(null != token){
+                System.out.println("token是："+token);
+                System.out.println(request.getRequestURI());
+                System.out.println(request.getRemoteAddr());
+                User sessionUserBean = userService.getUserByToken(token);
+                System.out.println("sessionUserBean是："+sessionUserBean);
+                if (isSuccess) {
+                    operationLogService.insertOperationLog(
+                            OperationLogUtil.getOperationLogObj(request,sessionUserBean, "成功", module, operation, "操作成功"));
+                } else {
+                    operationLogService.insertOperationLog(
+                            OperationLogUtil.getOperationLogObj(request,sessionUserBean, "失败", module, operation, errorMessage));
+                }
             }
+
+
+
         }
 
     }
