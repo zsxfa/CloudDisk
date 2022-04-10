@@ -108,6 +108,7 @@ public class FileDealComp {
                     .eq(UserFile::getUserId, sessionUserId);
             List<UserFile> userFileList = userFileMapper.selectList(lambdaQueryWrapper);
             System.out.println("userFileList的内容是: "+userFileList);
+            System.out.println("父路径和名字是："+parentFilePath + "/" + fileName);
             if (userFileList.size() == 0) {
                 UserFile userFile = new UserFile();
                 userFile.setUserId(sessionUserId);
@@ -137,13 +138,13 @@ public class FileDealComp {
      * @param sessionUserId
      */
     public synchronized void deleteRepeatSubDirFile(String filePath, Long sessionUserId) {
-        log.debug("删除子目录："+filePath);
+        log.info("删除子目录："+filePath);
         LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
 
         LambdaQueryWrapper<UserFile> eq = lambdaQueryWrapper.eq(UserFile::getUserId, sessionUserId);
         List<UserFile> userFiles1 = userFileMapper.selectList(eq);
 
-        lambdaQueryWrapper.select(UserFile::getFileName, UserFile::getFilePath)
+        lambdaQueryWrapper.select(UserFile::getFileName, UserFile::getFilePath,UserFile::getDeleteFlag)
                 .likeRight(UserFile::getFilePath, filePath)
                 .eq(UserFile::getIsDir, 1)
                 .eq(UserFile::getDeleteFlag, 0)
@@ -151,12 +152,13 @@ public class FileDealComp {
                 .groupBy(UserFile::getFilePath, UserFile::getFileName)
                 .having("count(fileName) >= 2");
         List<UserFile> repeatList = userFileMapper.selectList(lambdaQueryWrapper);
-
+        System.out.println("这里的repeatList是："+repeatList);
         for (UserFile userFile : repeatList) {
             LambdaQueryWrapper<UserFile> lambdaQueryWrapper1 = new LambdaQueryWrapper<>();
             lambdaQueryWrapper1.eq(UserFile::getFilePath, userFile.getFilePath())
                     .eq(UserFile::getFileName, userFile.getFileName())
-                    .eq(UserFile::getDeleteFlag, "0");
+                    .eq(UserFile::getDeleteFlag, "0")
+                    .eq(UserFile::getUserId, sessionUserId);
             List<UserFile> userFiles = userFileMapper.selectList(lambdaQueryWrapper1);
             for (int i = 0; i < userFiles.size() - 1; i ++) {
                 userFileMapper.deleteById(userFiles.get(i).getUserFileId());
